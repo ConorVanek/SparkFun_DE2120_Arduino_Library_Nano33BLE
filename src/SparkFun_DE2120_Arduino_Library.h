@@ -26,7 +26,7 @@
 #define _SPARKFUN_DE2120_ARDUINO_LIBRARY_H
 #include "Arduino.h"
 
-#include <SoftwareSerial.h>
+//#include <SoftwareSerial.h>
 
 #define DE2120_COMMAND_ACK 0x06
 #define DE2120_COMMAND_NACK 0x15
@@ -143,8 +143,9 @@ class DE2120
 public:
   DE2120();
 
-  bool begin(HardwareSerial &serialPort);
-  bool begin(SoftwareSerial &serialPort);
+  //bool begin(HardwareSerial &serialPort);
+  //bool begin(SoftwareSerial &serialPort);
+  bool begin();
 
   bool isConnected();   //Returns true if device's ID is what it should be
   uint8_t getVersion(); //Queries device for its Version #
@@ -179,11 +180,11 @@ public:
   bool stopScan();
 
 private:
-  //char _responseBuffer[]
+  //char _responseBuffer[];
 
-  HardwareSerial *hwStream;
-  SoftwareSerial *swStream;
-  Stream *_serial;
+  //HardwareSerial *hwStream;
+  //SoftwareSerial *swStream;
+  //Stream *_serial;
 };
 
 #endif
