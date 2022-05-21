@@ -1,4 +1,4 @@
-# Serial_2D_Barcode_Scanner_Library
+# Serial_2D_Barcode_Scanner_Library (Modified for use on the Arduino Nano 33 BLE using Serial1 (TX and RX Pins)
 Arduino library for controlling the DE2120 2D Barcode Scanner over serial
 
 ![2D Barcode Scanner Breakout](https://cdn.sparkfun.com/assets/parts/1/7/4/0/7/18088-SparkFun_2D_Barcode_Scanner-06.jpg)
