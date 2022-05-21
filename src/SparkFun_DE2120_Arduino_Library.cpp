@@ -25,7 +25,7 @@
 #include "SparkFun_DE2120_Arduino_Library.h"
 #include "Arduino.h"
 
-#include <SoftwareSerial.h>
+//#include <SoftwareSerial.h>
 
 //Constructor
 DE2120::DE2120(void)
@@ -34,36 +34,17 @@ DE2120::DE2120(void)
 
 //Initializes the device with basic settings
 //Returns false if device is not detected
-bool DE2120::begin(HardwareSerial &serialPort)
+
+bool DE2120::begin()
 {
-  //Trick comes from: https://forum.arduino.cc/index.php?topic=503782.msg3435988#msg3435988
-  hwStream = &serialPort;
-  swStream = NULL;
-  _serial = hwStream;
+  Serial.println("I am software");
 
   if (isConnected() == false)
     return (false); //No device detected
 
   //Clear any remaining incoming chars. The prevents a mis-read of the first barcode.
-  while (_serial->available())
-    _serial->read();
-
-  return (true); //We're all setup!
-}
-
-bool DE2120::begin(SoftwareSerial &serialPort)
-{
-  //Serial.println("I am software");
-  swStream = &serialPort;
-  hwStream = NULL;
-  _serial = swStream;
-
-  if (isConnected() == false)
-    return (false); //No device detected
-
-  //Clear any remaining incoming chars. The prevents a mis-read of the first barcode.
-  while (_serial->available())
-    _serial->read();
+  while (Serial1.available())
+    Serial1.read();
 
   return (true); //We're all setup!
 }
@@ -75,30 +56,22 @@ bool DE2120::begin(SoftwareSerial &serialPort)
 bool DE2120::isConnected()
 {
   //Attempt initial comm at 9600
-  if (hwStream)
-    hwStream->begin(9600);
-  else
-    swStream->begin(9600);
+  Serial1.begin(9600);
+  delay(10);
 
   if (sendCommand(COMMAND_GET_VERSION, "", 800)) //Takes ~430ms to get firmware version response
     return (true);
 
   //If we failed, try again at the factory default of 115200bps
-  if (hwStream)
-    hwStream->begin(115200);
-  else
-    swStream->begin(115200);
+  Serial1.begin(115200); 
 
-  delay(10);
+  delay(100);
 
   sendCommand(PROPERTY_BAUD_RATE, "5", 500); //Goto 9600bps
   //300ms is too quick for module to switch to new setting
 
   //Return to 9600bps
-  if (hwStream)
-    hwStream->begin(9600);
-  else
-    swStream->begin(9600);
+  Serial1.begin(9600);
 
   delay(10);
 
@@ -117,12 +90,12 @@ bool DE2120::factoryDefault()
 
 bool DE2120::available()
 {
-  return _serial->available();
+  return Serial1.available();
 }
 
 int DE2120::read()
 {
-  return _serial->read();
+  return Serial1.read();
 }
 
 // Construct a command or parameter and send it to the
@@ -140,17 +113,19 @@ bool DE2120::sendCommand(const char *cmd, const char *arg, uint32_t maxWaitInms)
   strcat(commandString, arg);
   strcat(commandString, end);
 
-  _serial->print(commandString);
+  Serial1.print(commandString);
 
   uint32_t timeout = millis() + maxWaitInms;
 
   while (millis() < timeout)
   {
-    if (_serial->available())
+    if (Serial1.available())
     {
-      while (_serial->available())
+      Serial.println("Response Available");
+      while (Serial1.available())
       {
-        byte incoming = _serial->read();
+        byte incoming = Serial1.read();
+	Serial.println(incoming);
         if (incoming == DE2120_COMMAND_ACK)
           return (true);
         else if (incoming == DE2120_COMMAND_NACK)
@@ -171,7 +146,7 @@ bool DE2120::sendCommand(const char *cmd, const char *arg, uint32_t maxWaitInms)
 // reach a CR in the receive buffer.
 bool DE2120::readBarcode(char *resultBuffer, uint8_t size)
 {
-  if (!_serial->available())
+  if (!Serial1.available())
     return false;
 
   bool crFound = false;
@@ -186,9 +161,9 @@ bool DE2120::readBarcode(char *resultBuffer, uint8_t size)
 
   for (uint8_t idx = strlen(resultBuffer); idx < size; idx++)
   {
-    if (_serial->available())
+    if (Serial1.available())
     {
-      resultBuffer[idx] = _serial->read();
+      resultBuffer[idx] = Serial1.read();
       if (resultBuffer[idx] == '\r')
       {
         resultBuffer[idx+1] = '\0';
