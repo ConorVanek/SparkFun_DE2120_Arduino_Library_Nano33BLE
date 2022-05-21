@@ -1,6 +1,7 @@
 /*
   Menu control of scanner features
   By: Nick Poole
+  Modified by Conor Vanek to be compatible with the Arduino Nano 33 BLE
   SparkFun Electronics
   Date: April 14th 2020
   License: This code is public domain but you buy me a beer if you use this and we meet someday (Beerware license).
@@ -18,11 +19,9 @@
   3 = RX pin on scanner
   GND = GND
   3.3V = 3.3V
-
+  
 */
 
-#include "SoftwareSerial.h"
-SoftwareSerial softSerial(2, 3); //RX, TX: Connect Arduino pin 2 to scanner TX pin. Connect Arduino pin 3 to scanner RX pin.
 
 #include "SparkFun_DE2120_Arduino_Library.h" //Click here to get the library: http://librarymanager/All#SparkFun_DE2120
 DE2120 scanner;
@@ -30,18 +29,23 @@ DE2120 scanner;
 #define BUFFER_LEN 40
 char scanBuffer[BUFFER_LEN];
 
+
+
 void setup()
 {
-  Serial.begin(115200);
   Serial.println("DE2120 Scanner Example");
+  Serial.begin(115200);
+  while( !Serial );
 
-  if (scanner.begin(softSerial) == false)
+
+  if (scanner.begin() == false)
   {
     Serial.println("Scanner did not respond. Please check wiring. Did you scan the POR232 barcode? Freezing...");
-    while (1)
+    //while (1)
       ;
   }
   Serial.println("Scanner online!");
+
 }
 
 void loop()
